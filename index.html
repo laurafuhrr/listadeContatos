@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de contatos</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <main>
+        <form>
+            <input type="hidden" name="id" /> 
+            <input name="nome" type="text" maxlength="50" placeholder="nome" required />
+            <input name="telefone" type="number" maxlength="10" placeholder="Telefone" required />
+            <input type="submit" placeholder="Enviar" />
+        </form>
+        <div class="list">
+            <input type="text" placeholder="pesquisar" onkeyup="listar(this.value)"/>
+            <ul id="Pessoas">
+    
+            </ul>
+        </div>
+    </main>
+    <script>
+        let lista = localStorage.getItem("minhaLista");
+
+        const formulario = document.querySelector("form");
+        const Pessoas = document.getElementById("Pessoas");
+
+        if (lista) {
+            lista = JSON.parse(lista);
+        } else {
+            lista = [];
+        }
+        
+        listar();
+
+        formulario.addEventListener("submit", function (e) {
+            e.preventDefault();
+            let novaPessoa = {};
+            novaPessoa.nome = this.nome.value;
+            novaPessoa.telefone = this.telefone.value;
+
+            if (this.id.value !== "" && this.id.value >=0) {
+                lista[this.id.value] = novaPessoa;
+            } else {
+                lista.push(novaPessoa);
+            }
+
+            this.reset();
+
+            salvarLS();
+
+            listar();
+        });
+
+        function listar(filtro='') {
+            Pessoas.innerHTML = "";
+            lista.forEach((item,key) => {
+                if (item.nome.toUpperCase().indexOf(filtro.toUpperCase()) >= 0 || filtro == '') {
+                    let linha = document.createElement('li');
+
+                    let s = `<button onclick="excluir(${key})">[Excluir]</button><button onclick="editar(${key})">[Editar]</button>`
+
+                    linha.innerHTML = "Nome: " + item.nome + " Telefone: " + item.telefone + s;
+                    Pessoas.appendChild(linha);
+                }
+                
+            });
+        }
+
+        function excluir(index) {
+            lista.splice(index, 1);
+            localStorage.setItem("minhaLista", JSON.stringify(lista));
+            listar();
+        }
+
+        function editar(id) {
+            formulario.id.value = id;
+            formulario.nome.value = lista[id].nome;
+            formulario.telefone.value = lista[id].telefone;
+        }
+
+        function salvarLS() {
+            localStorage.setItem("minhaLista", JSON.stringify(lista));
+        }
+    </script>
+</body>
+</html>
